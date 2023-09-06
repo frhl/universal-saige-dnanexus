@@ -1,0 +1,141 @@
+{
+  "name": "saige-universal-step-0",
+  "title": "Saige universal step 0",
+  "dxapi": "1.0.0",
+  "version": "0.0.1",
+  "delayWorkspaceDestruction" : true,
+  "inputSpec": [
+    {
+      "name": "GENETIC_DATA_FORMAT",
+      "class": "string",
+      "optional": false,
+      "patterns": [
+        "*"
+      ],
+      "help": ""
+    },
+    {
+      "name": "GENETIC_DATA_TYPE",
+      "class": "string",
+      "optional": false,
+      "patterns": [
+        "*"
+      ],
+      "help": ""
+    },
+    {
+      "name": "GENERATE_GRM",
+      "class": "string",
+      "optional": false,
+      "patterns": [
+        "*"
+      ],
+      "help": ""
+    },
+    {
+      "name": "GENERATE_VR_PLINK",
+      "class": "string",
+      "optional": false,
+      "patterns": [
+        "*"
+      ],
+      "help": ""
+    },
+    {
+      "name": "output_prefix",
+      "class": "string",
+      "optional": false,
+      "patterns": [
+        "*"
+      ],
+      "help": ""
+    },
+    {
+      "name": "sample_ids",
+      "class": "file",
+      "optional": false,
+      "patterns": [
+        "*"
+      ],
+      "help": ""
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "plink_for_var_ratio_bed",
+      "class": "file",
+      "optional": true,
+      "patterns": [
+        "*"
+      ],
+      "help": ""
+    },
+    {
+      "name": "plink_for_var_ratio_bim",
+      "class": "file",
+      "optional": true,
+      "patterns": [
+        "*"
+      ],
+      "help": ""
+    },
+    {
+      "name": "plink_for_var_ratio_fam",
+      "class": "file",
+      "optional": true,
+      "patterns": [
+        "*"
+      ],
+      "help": ""
+    },
+    {
+      "name": "GRM",
+      "class": "file",
+      "optional": true,
+      "patterns": [
+        "*"
+      ],
+      "help": ""
+    },
+    {
+      "name": "GRM_samples",
+      "class": "file",
+      "optional": true,
+      "patterns": [
+        "*"
+      ],
+      "help": ""
+    }
+  ],
+  "runSpec": {
+    "executionPolicy": { 
+      "restartOn": {
+        "*": 3
+      }
+    },
+    "timeoutPolicy": {
+      "*": {
+        "hours": 48
+      }
+    },
+    "interpreter": "bash",
+    "file": "src/saige.sh",
+    "distribution": "Ubuntu",
+    "release": "20.04",
+    "version": "0"
+  },
+  "access": {
+    "network": ["*"],
+    "project": "CONTRIBUTE"
+  },
+  "regionalOptions": {
+    "aws:eu-west-2": {
+      "systemRequirements": {
+        "*": {
+          "instanceType": "mem3_ssd1_v2_x8"
+        }
+      }
+    }
+  }
+}
+
