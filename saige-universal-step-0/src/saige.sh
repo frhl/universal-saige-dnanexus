@@ -14,16 +14,19 @@ main() {
     cd in
 
     if [[ $GENETIC_DATA_FORMAT == "plink" && $GENETIC_DATA_TYPE == "genotype" ]]; then
-        echo "Downloading genotype data"
-        for chr in {1..22}
-            dx download "/Bulk/Genotype Results/Genotype calls/ukb*_c${chr}_*.bed"
-            dx download "/Bulk/Genotype Results/Genotype calls/ukb*_c${chr}_*.bim"
-            dx download "/Bulk/Genotype Results/Genotype calls/ukb*_c${chr}_*.fam"
+        echo "Downloading genotype data.."
+        for chr in {1..22}; do
+            echo "Downloading genotype chr${chr} from flassen.."
+            dx download "project-GBvkP10Jg8Jpy18FPjPByv29:/wes_ko_ukbb/data/saige/step0/filter_array/UKB.chr${chr}.array.eur.isc_phased.bed"
+            dx download "project-GBvkP10Jg8Jpy18FPjPByv29:/wes_ko_ukbb/data/saige/step0/filter_array/UKB.chr${chr}.array.eur.isc_phased.bim"
+            dx download "project-GBvkP10Jg8Jpy18FPjPByv29:/wes_ko_ukbb/data/saige/step0/filter_array/UKB.chr${chr}.array.eur.isc_phased.fam"
+        done
     else
         echo "Format data-type pair not supported"
         return 1
     fi
 
+    echo "Downloading sample IDs"
     dx download "$sample_ids" -o sample_ids.txt
     mkdir sample_ids
     mv sample_ids.txt sample_ids/
@@ -84,3 +87,4 @@ main() {
     dx-upload-all-outputs
     return 0
 }
+
