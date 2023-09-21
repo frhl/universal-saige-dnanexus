@@ -27,7 +27,7 @@ main() {
         --covarColList $covariates \
         --categCovarColList "${categorical_covariates}" \
         --sampleIDs in/sample_ids/* \
-        --sampleIDCol "IID" \
+        --sampleIDCol "eid" \
         --outputPrefix ${output_prefix} \
         --isSingularity false \
         --sparseGRM GRM \

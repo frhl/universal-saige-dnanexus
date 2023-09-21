@@ -17,5 +17,5 @@ for anc in eur; do
       -i GENERATE_GRM="true" \
       -i sample_ids="${sample_id_path}" \
       -i output_prefix="${out_prefix}" \
-      --instance-type "mem3_ssd1_v2_x96" --priority high --destination ${out_dir} -y --name "brava-step0-${anc}"
+      --instance-type "mem3_ssd1_v2_x64" --priority high --destination ${out_dir} -y --name "brava-step0-${anc}"
 done

@@ -2,7 +2,8 @@
 
 main() {
     
-    git clone https://github.com/BRaVa-genetics/universal-saige
+    #git clone https://github.com/BRaVa-genetics/universal-saige
+    git clone https://github.com/frhl/universal-saige.git
 
     mv universal-saige/* .
 
@@ -16,10 +17,13 @@ main() {
     if [[ $GENETIC_DATA_FORMAT == "plink" && $GENETIC_DATA_TYPE == "genotype" ]]; then
         echo "Downloading genotype data.."
         for chr in {1..22}; do
-            echo "Downloading genotype chr${chr} from flassen.."
-            dx download "project-GBvkP10Jg8Jpy18FPjPByv29:/wes_ko_ukbb/data/saige/step0/filter_array/UKB.chr${chr}.array.eur.isc_phased.bed"
-            dx download "project-GBvkP10Jg8Jpy18FPjPByv29:/wes_ko_ukbb/data/saige/step0/filter_array/UKB.chr${chr}.array.eur.isc_phased.bim"
-            dx download "project-GBvkP10Jg8Jpy18FPjPByv29:/wes_ko_ukbb/data/saige/step0/filter_array/UKB.chr${chr}.array.eur.isc_phased.fam"
+            dx download "project-GBvkP10Jg8Jpy18FPjPByv29:/Bulk/Genotype Results/Genotype calls/ukb*_c${chr}_*.bed"
+            dx download "project-GBvkP10Jg8Jpy18FPjPByv29:/Bulk/Genotype Results/Genotype calls/ukb*_c${chr}_*.bim"
+            dx download "project-GBvkP10Jg8Jpy18FPjPByv29:/Bulk/Genotype Results/Genotype calls/ukb*_c${chr}_*.fam"          
+            #echo "Downloading genotype chr${chr} from flassen.."
+            #dx download "project-GBvkP10Jg8Jpy18FPjPByv29:/wes_ko_ukbb/data/saige/step0/filter_array/UKB.chr${chr}.array.eur.isc_phased.bed"
+            #dx download "project-GBvkP10Jg8Jpy18FPjPByv29:/wes_ko_ukbb/data/saige/step0/filter_array/UKB.chr${chr}.array.eur.isc_phased.bim"
+            #dx download "project-GBvkP10Jg8Jpy18FPjPByv29:/wes_ko_ukbb/data/saige/step0/filter_array/UKB.chr${chr}.array.eur.isc_phased.fam"
         done
     else
         echo "Format data-type pair not supported"
@@ -28,9 +32,11 @@ main() {
 
     echo "Downloading sample IDs"
     dx download "$sample_ids" -o sample_ids.txt
+    head sample_ids.txt
+    wc -l sample_ids.txt 
     mkdir sample_ids
     mv sample_ids.txt sample_ids/
-
+  
     cd ..
 
     out=$output_prefix
@@ -40,6 +46,9 @@ main() {
     mkdir -p ~/out/plink_for_var_ratio_fam/
     mkdir -p ~/out/GRM/
     mkdir -p ~/out/GRM_samples/
+
+    echo "sample id path: ~/in/sample_ids/sample_ids.txt"
+    wc -l ~/in/sample_ids/sample_ids.txt
 
     if [[ $GENERATE_VR_PLINK == "true" && $GENERATE_GRM == "false" ]]; then
         bash 00_step0_VR_and_GRM.sh \
@@ -60,7 +69,7 @@ main() {
             --geneticDataFormat $GENETIC_DATA_FORMAT \
             --geneticDataType $GENETIC_DATA_TYPE \
             --outputPrefix $out \
-            --sampleIDs ~/in/sample_ids/* \
+            --sampleIDs ~/in/sample_ids/sample_ids.txt \
             --generate_GRM 
 
         mv "${out}_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx" ~/out/GRM/
@@ -72,10 +81,10 @@ main() {
             --geneticDataFormat $GENETIC_DATA_FORMAT \
             --geneticDataType $GENETIC_DATA_TYPE \
             --outputPrefix $out \
+             --sampleIDs ~/in/sample_ids/sample_ids.txt \
             --generate_plink_for_vr \
-            --sampleIDs ~/in/sample_ids/* \
             --generate_GRM 
-        
+
         mv "${out}_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx" ~/out/GRM/
         mv "${out}_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx.sampleIDs.txt" ~/out/GRM_samples/
 

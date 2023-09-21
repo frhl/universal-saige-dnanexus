@@ -53,7 +53,7 @@
     {
       "name": "sample_ids",
       "class": "file",
-      "optional": false,
+      "optional": true,
       "patterns": [
         "*"
       ],
