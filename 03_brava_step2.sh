@@ -1,80 +1,53 @@
 dx build -f saige-universal-step-2
 
-test_type="group"
+set -o errexit
+set -o nounset
 
-for anc in AFR AMR EAS SAS EUR
-do
+pheno_dir="/well/lindgren-ukbb/projects/ukbb-11867/flassen/projects/KO/wes_ko_ukbb_nexus/data/phenotypes"
 
-    # binary (all sex)
-    phenos="pheno1 pheno2 pheno3"
-    
-    for pheno in $phenos
-    do
-        for chr in {{1..22},X}
-            do
-            dx run saige-universal-step-2 \
-                    -i output_prefix="out/chr${chr}_${pheno}_${anc}" \
-                    -i model_file="/brava/outputs/step1/${pheno}_${anc}.rda" \
-                    -i variance_ratio="/brava/outputs/step1/${pheno}_${anc}.varianceRatio.txt" \
-                    -i chrom="chr${chr}" \
-                    -i group_file="/brava/inputs/annotations/v7/ukb_wes_450k.july.qced.brava_common_rare.v7.chr${chr}.saige.txt.gz" \
-                    -i annotations="pLoF,damaging_missense_or_protein_altering,other_missense_or_protein_altering,synonymous,pLoF:damaging_missense_or_protein_altering,pLoF:damaging_missense_or_protein_altering:other_missense_or_protein_altering:synonymous" \
-                    -i test_type=$test_type \
-                    -i exome_bed=/Barney/wes/sample_filtered/ukb_wes_450k.qced.chr$chr.bed \
-                    -i exome_bim=/Barney/wes/sample_filtered/ukb_wes_450k.qced.chr$chr.bim \
-                    -i exome_fam=/Barney/wes/sample_filtered/ukb_wes_450k.qced.chr$chr.fam \
-                    -i GRM="/brava/outputs/step0/brava_${anc}_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx" \
-                    -i GRM_samples="/brava/outputs/step0/brava_${anc}_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx.sampleIDs.txt" \
-                    --instance-type "mem3_ssd1_v2_x8" --priority low --destination /brava/outputs/step2/ -y --name "${chr}_${pheno}_${anc}"
-        done
-    done
+step0_dir="/wes_ko_ukbb/data/saige/step0"
+step1_dir="/wes_ko_ukbb/data/saige/step1/binary"
+out_dir="/wes_ko_ukbb/data/saige/step2/binary/by_chrom"
+exome_dir="/wes_ko_ukbb/data/phased/calls/encoded/spliceai50"
+test_type="variant"
 
-    # binary (female)
-    phenos="pheno4 pheno5"
-    sex="F"
+dx mkdir -p ${out_dir}
 
-    for pheno in $phenos
-    do
-        for chr in {{1..22},X}
-            do
-            dx run saige-universal-step-2 \
-                    -i output_prefix="out/chr${chr}_${pheno}_${anc}_${sex}" \
-                    -i model_file="/brava/outputs/step1/${pheno}_${anc}_${sex}.rda" \
-                    -i variance_ratio="/brava/outputs/step1/${pheno}_${anc}_${sex}.varianceRatio.txt" \
-                    -i chrom="chr${chr}" \
-                    -i group_file="/brava/inputs/annotations/v7/ukb_wes_450k.july.qced.brava_common_rare.v7.chr${chr}.saige.txt.gz" \
-                    -i annotations="pLoF,damaging_missense_or_protein_altering,other_missense_or_protein_altering,synonymous,pLoF:damaging_missense_or_protein_altering,pLoF:damaging_missense_or_protein_altering:other_missense_or_protein_altering:synonymous" \
-                    -i test_type=$test_type \
-                    -i exome_bed=/Barney/wes/sample_filtered/ukb_wes_450k.qced.chr$chr.bed \
-                    -i exome_bim=/Barney/wes/sample_filtered/ukb_wes_450k.qced.chr$chr.bim \
-                    -i exome_fam=/Barney/wes/sample_filtered/ukb_wes_450k.qced.chr$chr.fam \
-                    -i GRM="/brava/outputs/step0/brava_${anc}_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx" \
-                    -i GRM_samples="/brava/outputs/step0/brava_${anc}_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx.sampleIDs.txt" \
-                    --instance-type "mem3_ssd1_v2_x8" --priority low --destination /brava/outputs/step2/ -y --name "${chr}_${pheno}_${anc}_${sex}"
-        done
-    done
 
-    # continuous (all sex)
-    phenos="pheno7"
-    
-    for pheno in $phenos
-    do
-        for chr in {{1..22},X}
-        do
-            dx run saige-universal-step-2 \
-                    -i output_prefix="out/chr${chr}_${pheno}_${anc}" \
-                    -i model_file="/brava/outputs/step1/${pheno}_${anc}.rda" \
-                    -i variance_ratio="/brava/outputs/step1/${pheno}_${anc}.varianceRatio.txt" \
-                    -i chrom="chr${chr}" \
-                    -i group_file="/brava/inputs/annotations/v7/ukb_wes_450k.july.qced.brava_common_rare.v7.chr${chr}.saige.txt.gz" \
-                    -i annotations="pLoF,damaging_missense_or_protein_altering,other_missense_or_protein_altering,synonymous,pLoF:damaging_missense_or_protein_altering,pLoF:damaging_missense_or_protein_altering:other_missense_or_protein_altering:synonymous" \
-                    -i test_type=$test_type \
-                    -i exome_bed=/Barney/wes/sample_filtered/ukb_wes_450k.qced.chr$chr.bed \
-                    -i exome_bim=/Barney/wes/sample_filtered/ukb_wes_450k.qced.chr$chr.bim \
-                    -i exome_fam=/Barney/wes/sample_filtered/ukb_wes_450k.qced.chr$chr.fam \
-                    -i GRM="/brava/outputs/step0/brava_${anc}_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx" \
-                    -i GRM_samples="/brava/outputs/step0/brava_${anc}_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx.sampleIDs.txt" \
-                    --instance-type "mem3_ssd1_v2_x8" --priority low --destination /brava/outputs/step2/ -y --name "${chr}_${pheno}_${anc}"
-        done
-    done
+# since we encode autosomes and sex-chromosomes seperately
+# need to grab them depending on the input chromosome
+get_chr_type () {
+  if [[ "${chr}" == "X" ]]; then echo "chrx"; else echo "auto"; fi
+}
+
+for anc in eur; do
+   bin_phenos="${pheno_dir}/bin_matrix_eur_header.txt"
+   for pheno in $(cat $bin_phenos | head -n1); do
+      for anno in "pLoF_damaging_missense"; do
+         for mode in "recessive"; do
+            for af in "01"; do
+               for pp in "0.90"; do
+                  for chr in {1..22} X; do
+                     chr_type=$(get_chr_type ${chr}) 
+                     exome_prefix="${exome_dir}/UKB.${chr_type}.${mode}.${anc}.af${af}.pp${pp}.${anno}"
+                     out_prefix="UKB.${chr}.${mode}.${anc}.af${af}.pp${pp}.${anno}"
+                     dx run saige-universal-step-2 \
+                              -i chrom="chr${chr}" \
+                              -i output_prefix="${out_prefix}" \
+                              -i model_file="${step1_dir}/${pheno}_${anc}.rda" \
+                              -i variance_ratio="${step1_dir}/${pheno}_${anc}.varianceRatio.txt" \
+                              -i test_type=$test_type \
+                              -i vcf_file="${exome_prefix}.vcf.gz" \
+                              -i vcf_index_file="${exome_prefix}.vcf.gz.csi" \
+                              -i GRM="${step0_dir}/ukb_array_400k_eur_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx" \
+                              -i GRM_samples="${step0_dir}/ukb_array_400k_eur_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx.sampleIDs.txt" \
+                              --instance-type "mem3_ssd1_v2_x8" --priority low --destination "${out_dir}" -y --name "${chr}_${pheno}_${anc}"
+                  done
+               done
+            done
+         done
+      done
+   done
 done
+
+

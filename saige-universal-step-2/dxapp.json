@@ -98,7 +98,7 @@
     {
       "name": "group_file",
       "class": "file",
-      "optional": false,
+      "optional": true,
       "patterns": [
         "*"
       ],
@@ -107,7 +107,7 @@
     {
       "name": "annotations",
       "class": "string",
-      "optional": false,
+      "optional": true,
       "patterns": [
         "*"
       ],
@@ -125,7 +125,7 @@
     {
       "name": "chrom",
       "class": "string",
-      "optional": false,
+      "optional": true,
       "patterns": [
         "*"
       ],
@@ -136,7 +136,7 @@
     {
       "name": "associations",
       "class": "file",
-      "optional": false,
+      "optional": true,
       "patterns": [
         "*"
       ],
@@ -145,7 +145,7 @@
     {
       "name": "associations_variant",
       "class": "file",
-      "optional": false,
+      "optional": true,
       "patterns": [
         "*"
       ],

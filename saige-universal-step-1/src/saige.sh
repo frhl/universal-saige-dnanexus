@@ -17,6 +17,7 @@ main() {
 
     mkdir out
 
+    #--invNormalize TRUE \
     ls -al
 
     bash 01_step1_fitNULLGLMM.sh \
