@@ -22,15 +22,15 @@ get_chr_type () {
 
 for anc in eur; do
    bin_phenos="${pheno_dir}/bin_matrix_eur_header.txt"
-   for pheno in $(cat $bin_phenos | head -n1); do
+   for pheno in $(cat $bin_phenos | head -n3); do
       for anno in "pLoF_damaging_missense"; do
-         for mode in "recessive"; do
-            for af in "01"; do
+         for mode in "additive" "recessive"; do
+            for af in "05"; do
                for pp in "0.90"; do
-                  for chr in {1..22} X; do
+                  for chr in {1..22}; do
                      chr_type=$(get_chr_type ${chr}) 
                      exome_prefix="${exome_dir}/UKB.${chr_type}.${mode}.${anc}.af${af}.pp${pp}.${anno}"
-                     out_prefix="UKB.${chr}.${mode}.${anc}.af${af}.pp${pp}.${anno}"
+                     out_prefix="UKB.${chr}.${pheno}.${mode}.${anc}.af${af}.pp${pp}.${anno}"
                      dx run saige-universal-step-2 \
                               -i chrom="chr${chr}" \
                               -i output_prefix="${out_prefix}" \
@@ -41,7 +41,7 @@ for anc in eur; do
                               -i vcf_index_file="${exome_prefix}.vcf.gz.csi" \
                               -i GRM="${step0_dir}/ukb_array_400k_eur_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx" \
                               -i GRM_samples="${step0_dir}/ukb_array_400k_eur_relatednessCutoff_0.05_5000_randomMarkersUsed.sparseGRM.mtx.sampleIDs.txt" \
-                              --instance-type "mem3_ssd1_v2_x8" --priority low --destination "${out_dir}" -y --name "${chr}_${pheno}_${anc}"
+                              --instance-type "mem3_ssd1_v2_x8" --priority low --destination "${out_dir}" -y --name "c${chr}_${pheno}_${anc}"
                   done
                done
             done
