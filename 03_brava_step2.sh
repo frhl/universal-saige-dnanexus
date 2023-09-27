@@ -24,10 +24,10 @@ get_chr_type () {
 
 for anc in eur; do
    bin_phenos="${pheno_dir}/bin_matrix_eur_header.txt"
-   for pheno in $(cat $bin_phenos | head -n3); do
+   for pheno in $(cat $bin_phenos | head -n100); do
       for anno in "pLoF_damaging_missense"; do
-         for mode in "additive" "recessive"; do
-            for af in "05"; do
+         for mode in "recessive"; do
+            for af in "01"; do
                for pp in "0.90"; do
                   for chr in {1..22}; do
                      chr_type=$(get_chr_type ${chr}) 
