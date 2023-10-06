@@ -65,67 +65,80 @@ main <- function(args){
         # subset to relevant cutoff
         d <- dt[dt$fname == id,]
         d <- d[d$AC_Allele2 >= min_allele2_ac,]
+        d$p.value <- as.numeric(d$p.value)
 
-        # get expected/obseved P on log-scale
-        d <- d[order(d$p.value),]
+        # remove NA P-values
+        is_na_row <- is.na(d$p.value)
+        if (sum(is_na_row)>0){
+            print(sum(is_na_row))
+            print(d[is_na_row,])
+            d <- d[!is.na_row, ]
+        }
+        
         n <- nrow(d)
-        d$p.value.expt <- get_expected_p(observed_p=d$p.value)
-        d$p.obs.log10 <- -log10(d$p.value)
-        d$p.expt.log10 <- -log10(d$p.value.expt)
-        d$clower = -log10(qbeta(p = (1 - ribbon_p) / 2, shape2 = n:1, shape1 = 1:n))
-        d$cupper = -log10(qbeta(p = (1 + ribbon_p) / 2, shape2 = n:1, shape1 = 1:n))
+        if (n > 0) {
+            # get expected/obseved P on log-scale
+            d <- d[order(d$p.value),]
+            d$p.value.expt <- get_expected_p(observed_p=d$p.value)
+            d$p.obs.log10 <- -log10(d$p.value)
+            d$p.expt.log10 <- -log10(d$p.value.expt)
+            d$clower = -log10(qbeta(p = (1 - ribbon_p) / 2, shape2 = n:1, shape1 = 1:n))
+            d$cupper = -log10(qbeta(p = (1 + ribbon_p) / 2, shape2 = n:1, shape1 = 1:n))
 
-        # We plot the labels of genes with FDR < 0.25
-        d$fdr <- p.adjust(d$p.value, method='fdr')
-        d$significant <- d$fdr<0.25
-        d$label <- d$hgnc_symbol
-        d$label[!d$significant] <- NA
+            # We plot the labels of genes with FDR < 0.25
+            d$fdr <- p.adjust(d$p.value, method='fdr')
+            d <- d[order(d$fdr),]
+            d$idx <- 1:nrow(d)
+            d$significant <- (d$fdr<0.25) & (d$idx < 30)
+            d$label <- d$hgnc_symbol
+            d$label[!d$significant] <- NA
 
-        # get various attributes to plot
-        pp_cutoff <- unique(d$pp_cutoff)
-        af_cutoff <- unique(d$af_cutoff)
-        annotation <- unique(d$annotation)
-        mode <- unique(d$mode)
-        trait <- unique(d$trait)
+            # get various attributes to plot
+            pp_cutoff <- unique(d$pp_cutoff)
+            af_cutoff <- unique(d$af_cutoff)
+            annotation <- unique(d$annotation)
+            mode <- unique(d$mode)
+            trait <- unique(d$trait)
 
-        # check that only one file are run at the time
-        stopifnot(length(pp_cutoff)==1)
-        stopifnot(length(af_cutoff)==1)
-        stopifnot(length(annotation)==1)
-        stopifnot(length(mode)==1)
-        stopifnot(length(trait)==1)
+            # check that only one file are run at the time
+            stopifnot(length(pp_cutoff)==1)
+            stopifnot(length(af_cutoff)==1)
+            stopifnot(length(annotation)==1)
+            stopifnot(length(mode)==1)
+            stopifnot(length(trait)==1)
 
-        # get minimum haplotype count
-        min_hap_affected <-min(d$AC_Allele2)
-        inflation <- round(calc_inflation(d$p.value),4)
+            # get minimum haplotype count
+            min_hap_affected <-min(d$AC_Allele2)
+            inflation <- round(calc_inflation(d$p.value),4)
 
-        # setup titles
-        title <- paste0(trait, " (", mode, ")")
-        subtitle <- paste0(annotation,", PP>", pp_cutoff, ", AF<", af_cutoff, "\nmin(haplotypes)=",min_hap_affected,", genes=",n,", \u03BB=", inflation)
+            # setup titles
+            title <- paste0(trait, " (", mode, ")")
+            subtitle <- paste0(annotation,", PP>", pp_cutoff, ", AF<", af_cutoff, "\nmin(haplotypes)=",min_hap_affected,", genes=",n,", \u03BB=", inflation)
 
-        plt <- ggplot(d, aes(x=p.expt.log10, y=p.obs.log10, ymax=clower, ymin=cupper, label=label)) +
-            geom_ribbon(data=d, fill="grey80", alpha = 0.7) +
-            geom_point_rast(data=d[!d$significant,], size = 2.50, alpha = 0.9, color="#BE1E2D") +
-            geom_point(data=d[d$significant,], size = 3.00, alpha = 0.9, color="#BE1E2D") +
-            geom_text_repel(color="black", max.overlaps = Inf, point.padding = 0.15, box.padding = 1) +
-            geom_abline(color = "black") + 
-            scale_x_continuous(breaks=scales::pretty_breaks(n=5)) +
-            scale_y_continuous(breaks=scales::pretty_breaks(n=5)) +
-            xlab(expression(paste(-log[10],'(Expected P-value)' ))) +
-            ylab(expression(paste(-log[10],'(Observed P-value)' ))) +
-            theme_classic() +
-            theme(
-                axis.text=element_text(size=15),
-                axis.title=element_text(size=15,face="bold"),
-                axis.title.x = element_text(margin=ggplot2::margin(t=16)),
-                axis.title.y = element_text(margin=ggplot2::margin(r=16)),
-                plot.title = element_text(hjust=0.5),
-                plot.subtitle = element_text(hjust=0.5),
-                legend.text=element_text(size=15),
-                legend.position="top"
-            ) + ggtitle(title, subtitle)
+            plt <- ggplot(d, aes(x=p.expt.log10, y=p.obs.log10, ymax=clower, ymin=cupper, label=label)) +
+                geom_ribbon(data=d, fill="grey80", alpha = 0.7) +
+                geom_point_rast(data=d[!d$significant,], size = 2.50, alpha = 0.9, color="#BE1E2D") +
+                geom_point(data=d[d$significant,], size = 3.00, alpha = 0.9, color="#BE1E2D") +
+                geom_text_repel(color="black", max.overlaps = Inf, point.padding = 0.15, box.padding = 1) +
+                geom_abline(color = "black") + 
+                scale_x_continuous(breaks=scales::pretty_breaks(n=5)) +
+                scale_y_continuous(breaks=scales::pretty_breaks(n=5)) +
+                xlab(expression(paste(-log[10],'(Expected P-value)' ))) +
+                ylab(expression(paste(-log[10],'(Observed P-value)' ))) +
+                theme_classic() +
+                theme(
+                    axis.text=element_text(size=15),
+                    axis.title=element_text(size=15,face="bold"),
+                    axis.title.x = element_text(margin=ggplot2::margin(t=16)),
+                    axis.title.y = element_text(margin=ggplot2::margin(r=16)),
+                    plot.title = element_text(hjust=0.5),
+                    plot.subtitle = element_text(hjust=0.5),
+                    legend.text=element_text(size=15),
+                    legend.position="top"
+                ) + ggtitle(title, subtitle)
 
-        print(plt)
+            print(plt)
+         }
     }
     dev.off()
 
@@ -134,7 +147,7 @@ main <- function(args){
 
 # add arguments
 parser <- ArgumentParser()
-parser$add_argument("--input_dir", default=NULL, required = TRUE, help = "path to input directory")
+parser$add_argument("--input_path", default=NULL, required = TRUE, help = "path to input directory")
 parser$add_argument("--mode", default=NULL, required = FALSE, help = "")
 parser$add_argument("--annotation", default=NULL, required = FALSE, help = "")
 parser$add_argument("--pp_cutoff", default=NULL, required = FALSE, help = "")
